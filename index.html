@@ -5,34 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prime Sms hub</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-   *{ box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
-    body{ margin:0; background:#f5f7ff; height:100vh; }
 
-    .chat-btn{
-      position:fixed; bottom:25px; right:25px;
-      width:60px; height:60px;
-      border-radius:50%; background:#5b6cff; color:#fff;
-      border:none; font-size:28px; cursor:pointer; box-shadow:0 10px 25px rgba(0,0,0,.25);
-    }
-
-    .chat-modal{
-      position:fixed; bottom:95px; right:25px;
-      width:340px; max-height:480px;
-      background:#fff; border-radius:14px;
-      box-shadow:0 15px 35px rgba(0,0,0,.25);
-      overflow:hidden; display:none; flex-direction:column;
-    }
-
-    .chat-header{ background:#5b6cff; color:#fff; padding:12px 14px; font-weight:bold; }
-    .chat-body{ flex:1; padding:12px; overflow-y:auto; background:#f4f6ff; }
-    .msg{ margin:6px 0; max-width:80%; padding:8px 10px; border-radius:12px; font-size:14px; }
-    .me{ margin-left:auto; background:#dfe2ff; }
-    .bot{ background:#fff; border:1px solid #e2e5ff; }
-    .chat-footer{ padding:10px; background:#fff; display:flex; gap:6px; }
-    .chat-footer input{ flex:1; padding:10px; border-radius:10px; border:1px solid #ccc; outline:none; }
-    .chat-footer button{ padding:10px 14px; background:#5b6cff; color:#fff; border:none; border-radius:10px; cursor:pointer; }
-  </style>
 </head>
 <body>
     <header class="header">
@@ -129,81 +102,65 @@
         </div>
         </div>
 
+
+</div>
+
+    </section>
+    <!-- Floating Chat Button -->
 <button class="chat-btn" onclick="toggleChat()">💬</button>
 
+<!-- Chat Modal -->
 <div class="chat-modal" id="chatBox">
   <div class="chat-header">Support Chat</div>
   <div class="chat-body" id="messages"></div>
   <div class="chat-footer">
     <input id="msg" placeholder="Type a message..." />
-    <button onclick="send()">Send</button>
+    <button onclick="sendMessage()">Send</button>
   </div>
 </div>
+<script>
+const API = "/api/bot"; // matches bot.js exactly
 
-    </section>
-    
-</body>
-<script> const API = "http://127.0.0.1:5500";
-
-// Toggle chat box visibility
 function toggleChat() {
   const box = document.getElementById("chatBox");
   box.style.display = (box.style.display === "flex") ? "none" : "flex";
 }
 
-// Send message to backend
-async function send() {
+async function sendMessage() {
   const input = document.getElementById("msg");
   const text = input.value.trim();
   if (!text) return;
 
+  // show message instantly in chat UI
+  addMessage(text, "web");
+
   try {
-    const res = await fetch(`${API}/send`, {
+    await fetch(API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
+      body: JSON.stringify({
+        sender: "Website",
+        text: text
+      })
     });
-
-    if (!res.ok) {
-      console.error("Failed to send message:", res.statusText);
-      return;
-    }
-
-    input.value = "";  // clear input
-    load();            // refresh messages
   } catch (err) {
-    console.error("Error sending message:", err);
+    console.error("Send failed:", err);
   }
+
+  input.value = "";
 }
 
-// Load messages from backend
-async function load() {
-  try {
-    const res = await fetch(`${API}/messages`);
-    if (!res.ok) {
-      console.error("Failed to load messages:", res.statusText);
-      return;
-    }
-
-    const data = await res.json();
-    const box = document.getElementById("messages");
-    box.innerHTML = "";
-
-    data.forEach(m => {
-      const div = document.createElement("div");
-      div.className = "msg " + (m.from === "website" ? "me" : "bot");
-      div.textContent = m.text;
-      box.appendChild(div);
-    });
-
-    box.scrollTop = box.scrollHeight; // scroll to bottom
-  } catch (err) {
-    console.error("Error loading messages:", err);
-  }
+// UI helper (frontend only)
+function addMessage(text, from) {
+  const container = document.getElementById("messages");
+  const div = document.createElement("div");
+  div.className = "message " + from;
+  div.textContent = text;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
 }
-
-// Refresh messages every 2s
-setInterval(load, 2000);
-load();
 </script>
+
+</body>
+
 </html>
