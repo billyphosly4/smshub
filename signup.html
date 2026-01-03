@@ -3,52 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Register</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <main>
+
+<main>
     <div class="login">
-            <div  class="logo">
-                <img src="hero.png" alt="">
-            </div>
-            <h1>Welcome back!</h1>
-            <h2>Login with your account</h2>
 
-             <div class="input-area"> 
-               
-                
-                <div class="input-field"> 
-                        <label for="Name">Name</label><br><br>
-                       <input type="Name" placeholder="Your name" required>
-                    </div><br>
-                    <div class="input-field"> 
-                        <label for="Email">Email</label><br><br>
-                    <input type="Email" placeholder="Your Email">
-                    </div><br><br>
-                    <div class="input-field"> 
-                        <label for="phone">Phone number</label><br><br>
-                    <input type="phone" placeholder="Your Phone number">
-                    </div><br><br>
-                    <div class="input-field"> 
-                        <label for="password">password</label><br><br>
-                    <input type="password" placeholder="Your Password">
-                    </div><br><br>
-                    <div class="input-field"> 
-                        <label for="confirm password">Confirm Password</label><br><br>
-                    <input type="Confirm password" placeholder=" Confirm Password">
-                    </div>
-                </div><br><br><br>
+        <div class="logo">
+            <img src="hero.png" alt="Logo">
+        </div>
 
-                <div class="auth-button">
-                     <button type="submit" class="btn"><a href="">Register</a></button>
+        <h1>Welcome!</h1>
+        <h2>Create your account</h2>
+
+        <!-- SIGNUP FORM -->
+        <form id="signupForm">
+
+            <div class="input-area">
+
+                <div class="input-field">
+                    <label>Name</label><br><br>
+                    <input type="text" id="name" placeholder="Your name" required>
                 </div><br>
 
-            
-                    <a href="login.html">Already Registered ?</a>
-                </p>
-        
-            </div>
-    </main>
+                <div class="input-field">
+                    <label>Email</label><br><br>
+                    <input type="email" id="email" placeholder="Your Email" required>
+                </div><br>
+
+                <div class="input-field">
+                    <label>Phone number</label><br><br>
+                    <input type="text" id="phone" placeholder="Your Phone number">
+                </div><br>
+
+                <div class="input-field">
+                    <label>Password</label><br><br>
+                    <input type="password" id="password" placeholder="Your Password" required>
+                </div><br>
+
+                <div class="input-field">
+                    <label>Confirm Password</label><br><br>
+                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                </div>
+
+            </div><br><br>
+
+            <div class="auth-button">
+                <button type="submit" class="btn">Register</button>
+            </div><br>
+
+            <a href="login.html">Already Registered?</a>
+
+        </form>
+    </div>
+</main>
+
+<!-- FIREBASE SCRIPT -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+    // 🔥 YOUR FIREBASE CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyCIK3C5qAOUZUtUixX1knFRSkXAYXOCDaA",
+        authDomain: "primesmshub-c0f58.firebaseapp.com",
+        projectId: "primesmshub-c0f58",
+        storageBucket: "primesmshub-c0f58.firebasestorage.app",
+        messagingSenderId: "40273399506",
+        appId: "1:40273399506:web:349a116c082d830987a70b"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // SIGNUP HANDLER
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+
+        if (password.length < 6) {
+            alert("Password must be at least 6 characters");
+            return;
+        }
+
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "users", user.uid), {
+                name: name,
+                email: email,
+                phone: phone,
+                createdAt: new Date()
+            });
+
+            alert("Registration successful 🎉");
+            window.location.href = "login.html";
+
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        }
+    });
+</script>
+
 </body>
 </html>

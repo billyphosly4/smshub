@@ -47,6 +47,14 @@ function setChatStatus(text) {
 }
 
 function appendMessage(text, cls) {
+  // Only append messages that are either sent by web client ('msg-web')
+  // or received from Telegram ('msg-telegram'). Route informational
+  // messages to the status area so the chat shows only conversation.
+  if (cls !== 'msg-web' && cls !== 'msg-telegram') {
+    setChatStatus(text);
+    return;
+  }
+
   const div = document.createElement('div');
   div.textContent = text;
   div.className = cls;
@@ -81,7 +89,7 @@ if (typeof io !== 'undefined') {
       // Page served from Live Server or different port; try explicit server host immediately
       try {
         socket = io('http://localhost:3000', { transports: ['websocket', 'polling'] });
-        appendMessage('Connecting to socket at http://localhost:3000', 'msg-web');
+        setChatStatus('Connecting to socket at http://localhost:3000');
         attachSocketLogging(socket);
       } catch (err) {
         console.warn('Socket.IO explicit connect failed', err);
@@ -92,7 +100,7 @@ if (typeof io !== 'undefined') {
         if (!socket || !socket.connected) {
           try {
             socket = io('http://127.0.0.1:3000', { transports: ['websocket', 'polling'] });
-            appendMessage('Connecting to socket at http://127.0.0.1:3000 (fallback)', 'msg-web');
+            setChatStatus('Connecting to socket at http://127.0.0.1:3000 (fallback)');
             attachSocketLogging(socket);
           } catch (err) {
             console.warn('Socket.IO fallback connect failed', err);
@@ -147,7 +155,7 @@ if (socket) {
 
   socket.on('message_sent', (payload) => {
     if (!payload.ok) {
-      appendMessage('Error sending message: ' + payload.error, 'msg-web');
+      setChatStatus('Error sending message: ' + payload.error);
     }
   });
 }
@@ -179,7 +187,7 @@ sendBtn.addEventListener('click', async () => {
   const chatId = currentChatId || DEFAULT_CHAT_ID;
   if (!text) return;
   if (!chatId) {
-    appendMessage('Send blocked: no chat id configured in code or server. Set DEFAULT_CHAT_ID in script or enable server default.', 'msg-web');
+    setChatStatus('Send blocked: no chat id configured in code or server. Set DEFAULT_CHAT_ID in script or enable server default.');
     return;
   }
 
@@ -274,13 +282,6 @@ sendBtn.addEventListener('click', async () => {
     const errMsg = (res.json && res.json.error) || (res.error && res.error.toString()) || 'Unknown error';
     setChatStatus('Failed to send: ' + errMsg);
     console.error('All send attempts failed:', errors);
-  }
-
-  if (res.ok && res.json && res.json.ok) {
-    appendMessage(`[me -> ${chatId}] ${text}`, 'msg-web');
-  } else {
-    const errMsg = (res.json && res.json.error) || res.error || 'Unknown error';
-    appendMessage('Failed to send: ' + errMsg, 'msg-web');
   }
 
   messageInput.value = '';
