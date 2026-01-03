@@ -5,12 +5,32 @@ const { Server } = require('socket.io');
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_TOKEN;
-if (!token) {
-  console.error('Error: TELEGRAM_TOKEN environment variable is not set.');
-  process.exit(1);
-}
 
-const bot = new TelegramBot(token, { polling: true });
+let bot;
+if (!token) {
+  console.warn('Warning: TELEGRAM_TOKEN is not set. Starting server with mock bot for local development.');
+  // Minimal stub used for local development so the server stays up and send operations are logged.
+  bot = {
+    sendMessage: async (chatId, text) => {
+      console.log('Mock bot sendMessage:', { chatId, text });
+      return { ok: true, mock: true, chatId: Number(chatId), text };
+    },
+    on: () => {}, // no-op for on(event, handler)
+  };
+} else {
+  try {
+    bot = new TelegramBot(token, { polling: true });
+  } catch (err) {
+    console.error('Failed to initialize Telegram bot:', err);
+    bot = {
+      sendMessage: async (chatId, text) => {
+        console.error('Bot disabled, cannot send message', chatId, text);
+        throw new Error('Telegram bot not initialized');
+      },
+      on: () => {},
+    };
+  }
+}
 const app = express();
 const server = http.createServer(app);
 // Enable CORS for Socket.IO (use restrictive origin in production)
