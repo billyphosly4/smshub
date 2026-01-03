@@ -116,6 +116,16 @@ Direct send endpoint
 CORS & Live Server notes
 - If you open `index.html` via a separate Live Server (e.g., `127.0.0.1:5500`), the client will try to connect to the Node server at `http://localhost:3000` as a fallback and will also call the HTTP endpoints there. Ensure the Node server is running and reachable at that address.
 
+Deployment notes (Vercel and other static hosts)
+- Vercel (and most static serverless platforms) does not host long-running Node processes and therefore cannot run a Socket.IO/WebSocket server. If you deploy the *frontend* to Vercel while the Node process is not hosted on a WebSocket-capable host, the client will show a "socket connect error" or "websocket error" in the browser console.
+
+Options if you want live updates on deployed sites:
+1. Host the Node socket server on a platform that supports persistent Node processes and WebSockets, e.g., Render, Fly.io, Railway, or a VPS/PM2. Then point the client at that host.
+2. Use a fallback polling approach (already implemented): the client can poll `GET /api/recent` periodically to fetch the latest messages when Socket.IO isn't available — this works from static hosts like Vercel but is less real-time.
+3. Use a managed real-time provider (Pusher, Ably, Supabase Realtime, etc.) which can be used from serverless functions and client browsers without needing a persistent server.
+
+If you deployed the frontend to Vercel and are seeing websocket errors, either deploy the Node server somewhere that supports WebSockets or rely on the polling fallback. The repository already includes a polling fallback (`/api/recent`) so the UI can show incoming messages even without Socket.IO.
+
 ## Security
 - **Do not commit** your `.env` or token to source control.
 - This is a minimal demo for local development only. For production, add authentication and SSL/TLS.

@@ -67,6 +67,17 @@ app.get('/api/config', (req, res) => {
   res.json({ defaultChatId: DEFAULT_CHAT_ID });
 });
 
+// API: return recent chats/messages so clients without Socket.IO can poll for updates
+app.get('/api/recent', (req, res) => {
+  try {
+    const chats = Array.from(recentChats.values());
+    return res.json({ ok: true, chats });
+  } catch (err) {
+    console.error('Failed to return recent chats', err);
+    return res.status(500).json({ ok: false, error: err.toString() });
+  }
+});
+
 // API: direct send message endpoint (useful when Socket.IO is not available on client)
 app.post('/api/send', async (req, res) => {
   console.log('/api/send request from', req.ip, 'headers:', req.headers);

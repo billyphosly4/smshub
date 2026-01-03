@@ -145,7 +145,7 @@ if (typeof io !== 'undefined') {
 
 if (socket) {
   // connection handled by attachSocketLogging which updates status; avoid posting into chat area
-  socket.on('connect', () => { setChatStatus('Connected to bot server'); });
+  socket.on('connect', () => { setChatStatus('Connected to bot server'); stopRecentPolling(); });
 
   socket.on('chats_list', (chats) => {
     if (chats && chats.length) {
@@ -194,6 +194,68 @@ if (socket) {
       pending.textContent = '✓✓';
     }
   });
+
+  socket.on('disconnect', (reason) => {
+    console.log('socket disconnected', reason);
+    // If socket disconnects, fall back to polling for updates
+    startRecentPolling();
+  });
+} else {
+  // If Socket.IO is not available or failed to connect, poll /api/recent periodically
+  startRecentPolling();
+}
+
+// Polling fallback: fetch recent chats periodically so deployed static sites (Vercel) can receive updates
+let recentPollingTimer = null;
+const RECENT_POLL_INTERVAL = 5000; // ms
+const lastSeen = {}; // map chatId -> timestamp
+
+function stopRecentPolling() {
+  if (recentPollingTimer) {
+    clearInterval(recentPollingTimer);
+    recentPollingTimer = null;
+  }
+}
+
+function startRecentPolling() {
+  if (recentPollingTimer) return; // already polling
+  fetchAndApplyRecent();
+  recentPollingTimer = setInterval(fetchAndApplyRecent, RECENT_POLL_INTERVAL);
+}
+
+async function fetchAndApplyRecent() {
+  const candidates = [
+    '/api/recent',
+    `${location.protocol}//${location.hostname}:3000/api/recent`,
+    'http://localhost:3000/api/recent',
+    'http://127.0.0.1:3000/api/recent'
+  ];
+  for (const url of candidates) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const r = await fetch(url, { signal: controller.signal, credentials: 'same-origin' });
+      clearTimeout(timeout);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (j && j.ok && Array.isArray(j.chats)) {
+        // Each chat entry: { chatId, from, text, date }
+        j.chats.forEach(c => {
+          const dt = c.date || Date.now();
+          if (!lastSeen[c.chatId] || dt > lastSeen[c.chatId]) {
+            lastSeen[c.chatId] = dt;
+            appendMessage(`[${c.chatId}] ${c.from && (c.from.first_name || c.from.username) ? (c.from.first_name || c.from.username) : 'user'}: ${c.text}`, 'msg-telegram');
+            currentChatId = c.chatId;
+          }
+        });
+        // we succeeded, stop trying other candidates this round
+        return;
+      }
+    } catch (err) {
+      // try next candidate
+      // console.warn('recent fetch failed for', url, err);
+    }
+  }
 }
 
 // Fetch server-side config (hidden default chat id) so we can send immediately without waiting for a message
