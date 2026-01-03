@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: smshub
+    env: node
+    plan: free
+    branch: main
+    repo: https://github.com/<your-org-or-username>/smshub
+    buildCommand: "npm install --production" # optional if Render runs npm install automatically
+    startCommand: "npm start"
+    envVars:
+      - key: TELEGRAM_TOKEN
+        fromDatabase: false
+      - key: DEFAULT_CHAT_ID
+        fromDatabase: false
+    # Notes: set secrets in Render dashboard after creating service (do NOT commit tokens in repo)

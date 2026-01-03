@@ -9,6 +9,9 @@ const chatStatus = document.getElementById('chatStatus');
 // Optional: hardcode a default chat id here (number) if you want the client to always send to a specific chat.
 // Example: const DEFAULT_CHAT_ID = 123456789; (client-side fallback only)
 const DEFAULT_CHAT_ID = 7711425125; // set to a number to hardcode (applied automatically)
+// Optional: meta tag to point frontend at a remote backend (useful for Vercel frontend + Render backend)
+// Insert in <head>: <meta name="server-url" content="https://your-backend.example.com">
+const SERVER_URL = (document.querySelector('meta[name="server-url"]') || {}).content || null;
 let currentChatId = null;
 
 // Apply client-side default immediately so sending is enabled without prompting
@@ -108,7 +111,32 @@ function attachSocketLogging(s) {
 if (typeof io !== 'undefined') {
   try {
     // If page is served from the Node server (port 3000), use same-origin connect
-    if (location.port === '3000' || location.hostname === 'localhost') {
+    // If a SERVER_URL meta tag is provided, prefer it for deployed frontend + remote backend scenarios
+    if (SERVER_URL) {
+      try {
+        socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
+        setChatStatus('Connecting to socket at ' + SERVER_URL);
+        attachSocketLogging(socket);
+      } catch (err) {
+        console.warn('Socket.IO connect to SERVER_URL failed', err);
+      }
+
+      // Fallback to localhost if direct connect fails
+      setTimeout(() => {
+        if (!socket || !socket.connected) {
+          try {
+            socket = io('http://localhost:3000', { transports: ['websocket', 'polling'] });
+            setChatStatus('Connecting to socket at http://localhost:3000 (fallback)');
+            attachSocketLogging(socket);
+          } catch (err) {
+            console.warn('Socket.IO fallback connect failed', err);
+            setChatStatus('Live updates unavailable — using HTTP send');
+          }
+        }
+      }, 1000);
+
+    } else if (location.port === '3000' || location.hostname === 'localhost') {
+      // Page served from the Node server (port 3000), use same-origin connect
       socket = io();
       attachSocketLogging(socket);
     } else {

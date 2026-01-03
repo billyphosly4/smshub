@@ -45,6 +45,58 @@ npm i -g pm2
 npx pm2 start ecosystem.config.js --env production --name smshub
 ```
 
+## Deploying backend to Render (recommended)
+Render provides persistent Node services with WebSocket support and free tiers that are ideal for this app.
+
+1. Create a new Web Service in Render and connect your GitHub repository (branch `main` or your preferred branch).
+2. Use `npm start` as the start command (Render will run `npm install` automatically).
+3. Add environment variables in Render dashboard (do NOT commit these to the repository):
+   - `TELEGRAM_TOKEN` (required)
+   - `DEFAULT_CHAT_ID` (optional)
+   - `PORT` (optional, default 3000)
+4. Optionally add `render.yaml` at repo root (this repo includes `render.yaml` as an example manifest).
+
+Once deployed, your backend will be reachable at `https://<your-service>.onrender.com`.
+
+## Deploying frontend to Vercel (static site) and connecting to backend
+1. Deploy the repository to Vercel for the frontend (configure as a static site).
+2. Before deploying, set the backend URL so the frontend knows where to connect:
+   - Option A (simple): Edit `index.html` and replace the `__SERVER_URL__` placeholder in the meta tag with your backend URL (e.g. `https://your-service.onrender.com`).
+   - Option B (automated): run the helper script before deploy:
+
+```
+# from project root
+# set the SERVER_URL environment variable or pass as an argument
+SERVER_URL="https://your-service.onrender.com" npm run set:server-url
+# or
+npm run set:server-url -- "https://your-service.onrender.com"
+```
+
+3. Deploy to Vercel. The frontend will now use the specified backend for Socket.IO and HTTP polling.
+
+> Note: If the frontend is served over HTTPS, ensure the backend URL uses HTTPS so WebSocket uses wss:// and avoids mixed-content errors.
+
+## CI / Automated deploys (GitHub Actions)
+This repo includes a GitHub Actions workflow at `.github/workflows/deploy.yml` that can automatically deploy the backend to Render and optionally make the frontend use the correct `SERVER_URL` for the deployed backend.
+
+### Workflow overview
+- Runs on push to `main` or manually via `workflow_dispatch`.
+- Steps:
+  - Install and run `npm ci`.
+  - Optionally replace `__SERVER_URL__` in `index.html` using `npm run set:server-url` if `FRONTEND_SERVER_URL` secret is set (the workflow will commit and push that change back to `main`).
+  - Trigger a Render deploy for the backend using `RENDER_SERVICE_ID` and `RENDER_API_KEY` secrets.
+  - Optionally call a Vercel Deploy Hook (`VERCEL_DEPLOY_HOOK`) to trigger frontend redeploy.
+
+### Secrets used (add these in the GitHub repo Settings → Secrets → Actions)
+- `RENDER_SERVICE_ID` — the Render service id for your backend (required to trigger a deploy).
+- `RENDER_API_KEY` — a Render API key with deploy permissions.
+- `FRONTEND_SERVER_URL` — (optional) the backend URL (e.g. `https://your-backend.onrender.com`) to write into `index.html` at deploy time.
+- `VERCEL_DEPLOY_HOOK` — (optional) a Vercel deploy hook URL to trigger frontend redeploy after backend is deployed.
+
+### Notes and recommendations
+- When `FRONTEND_SERVER_URL` is provided, the workflow runs `npm run set:server-url` and commits `index.html` to `main`. This updates the repo so Vercel's Git integration can pick up the correct `SERVER_URL` on the next frontend build. If you prefer not to commit, leave `FRONTEND_SERVER_URL` empty and instead set the `SERVER_URL` environment variable in Vercel dashboard (then configure your Vercel build to run `npm run set:server-url` before publish).
+- To avoid accidental commits, you can instead run `npm run set:server-url` locally and push before deploy, or set environment variables in Vercel and set the build command to `npm run set:server-url && npm run vercel:build`.
+
 2. Start the app with PM2:
 
 ```
