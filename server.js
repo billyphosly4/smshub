@@ -1,166 +1,96 @@
-require('dotenv').config();
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const TelegramBot = require('node-telegram-bot-api');
+require('dotenv').config()
+const express = require('express')
+const http = require('http')
+const { Server } = require('socket.io')
+const TelegramBot = require('node-telegram-bot-api')
 
-const token = process.env.TELEGRAM_TOKEN;
+const app = express()
+const server = http.createServer(app)
+const io = new Server(server, { cors: { origin: '*' } })
 
-let bot;
+app.use(express.json())
+app.use(express.static(__dirname))
+
+/* ================= TELEGRAM BOT ================= */
+
+const token = process.env.TELEGRAM_BOT_TOKEN
 if (!token) {
-  console.warn('Warning: TELEGRAM_TOKEN is not set. Starting server with mock bot for local development.');
-  // Minimal stub used for local development so the server stays up and send operations are logged.
-  bot = {
-    sendMessage: async (chatId, text) => {
-      console.log('Mock bot sendMessage:', { chatId, text });
-      return { ok: true, mock: true, chatId: Number(chatId), text };
-    },
-    on: () => {}, // no-op for on(event, handler)
-  };
-} else {
-  try {
-    bot = new TelegramBot(token, { polling: true });
-  } catch (err) {
-    console.error('Failed to initialize Telegram bot:', err);
-    bot = {
-      sendMessage: async (chatId, text) => {
-        console.error('Bot disabled, cannot send message', chatId, text);
-        throw new Error('Telegram bot not initialized');
-      },
-      on: () => {},
-    };
-  }
+  console.error('❌ TELEGRAM_BOT_TOKEN not set')
+  process.exit(1)
 }
-const app = express();
-const server = http.createServer(app);
-// Enable CORS for Socket.IO (use restrictive origin in production)
-const io = new Server(server, { cors: { origin: '*' } });
 
-// Default chat id: per user request the chat id is configured in server code (hardcoded).
-// WARNING: Hardcoding IDs/tokens in code is less secure. Do NOT commit this file if it contains sensitive values.
-const DEFAULT_CHAT_ID = 7711425125; // <-- configured here per user request
-// Server will use the DEFAULT_CHAT_ID since this is configured in code
-const ALLOW_DEFAULT_CHAT = true; // set to false to disable automatic use
+const bot = new TelegramBot(token)
+const WEBHOOK_URL = `https://smshub-ftgg.onrender.com/bot${token}`
 
+bot.setWebHook(WEBHOOK_URL)
 
-app.use(express.json());
+/* Telegram webhook endpoint */
+app.post(`/bot${token}`, (req, res) => {
+  bot.processUpdate(req.body)
+  res.sendStatus(200)
+})
 
-// Simple CORS middleware for API endpoints to allow local testing from other hosts (e.g., Live Server)
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
-});
+/* ================= CONFIG ================= */
 
-app.use(express.static(__dirname));
-app.get('/health', (req, res) => res.send('ok'));
+const DEFAULT_CHAT_ID = 7711425125
+const ALLOW_DEFAULT_CHAT = true
 
-// Simple echo endpoint to verify API reachability from browser
-app.get('/api/echo', (req, res) => {
-  console.log('/api/echo from', req.ip, 'origin:', req.headers.origin || req.headers.referer);
-  res.json({ ok: true, now: Date.now(), origin: req.headers.origin || null });
-});
+/* ================= API ================= */
 
-// API: return server-side config (hidden default chat id)
-app.get('/api/config', (req, res) => {
-  res.json({ defaultChatId: DEFAULT_CHAT_ID });
-});
+app.get('/health', (req, res) => res.send('ok'))
 
-// API: return recent chats/messages so clients without Socket.IO can poll for updates
-app.get('/api/recent', (req, res) => {
-  try {
-    const chats = Array.from(recentChats.values());
-    return res.json({ ok: true, chats });
-  } catch (err) {
-    console.error('Failed to return recent chats', err);
-    return res.status(500).json({ ok: false, error: err.toString() });
-  }
-});
-
-// API: direct send message endpoint (useful when Socket.IO is not available on client)
 app.post('/api/send', async (req, res) => {
-  console.log('/api/send request from', req.ip, 'headers:', req.headers);
-  console.log('/api/send body:', req.body);
-  const { text, chatId } = req.body || {};
-  const targetChatId = chatId || (ALLOW_DEFAULT_CHAT ? DEFAULT_CHAT_ID : null);
-  if (!targetChatId) {
-    console.warn('Rejecting /api/send: no chat id provided and DEFAULT_CHAT_ID usage disabled');
-    return res.status(400).json({ ok: false, error: 'No chatId provided and DEFAULT_CHAT_ID usage is disabled on server.' });
+  const { text, chatId } = req.body
+  const targetChatId = chatId || (ALLOW_DEFAULT_CHAT ? DEFAULT_CHAT_ID : null)
+
+  if (!targetChatId || !text) {
+    return res.status(400).json({ ok: false, error: 'Missing chatId or text' })
   }
 
   try {
-    const result = await bot.sendMessage(Number(targetChatId), text);
-    console.log('Sent message via /api/send to', targetChatId, text);
-    return res.json({ ok: true, result });
+    const result = await bot.sendMessage(Number(targetChatId), text)
+    res.json({ ok: true, result })
   } catch (err) {
-    console.error('Failed to send message via /api/send', err);
-    return res.status(500).json({ ok: false, error: err.toString() });
+    console.error('Telegram send error:', err.message)
+    res.status(500).json({ ok: false, error: err.message })
   }
-});
+})
 
-const recentChats = new Map();
+/* ================= SOCKET.IO ================= */
 
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
+const recentChats = new Map()
+
+bot.on('message', msg => {
   const payload = {
-    chatId,
+    chatId: msg.chat.id,
     from: msg.from,
     text: msg.text || '',
-    date: Date.now(),
-  };
-
-  recentChats.set(chatId, payload);
-  io.emit('tg_message', payload);
-  console.log('Telegram message relayed to web clients:', payload);
-});
-
-io.on('connection', (socket) => {
-  console.log('Web client connected', socket.id);
-
-  // Send current chats list
-  socket.emit('chats_list', Array.from(recentChats.values()));
-
-  // Inform the client of an optional server-side default chat id (kept hidden in UI)
-  if (ALLOW_DEFAULT_CHAT && DEFAULT_CHAT_ID) {
-    console.log('Emitting default_chat to client', socket.id, DEFAULT_CHAT_ID);
-    socket.emit('default_chat', DEFAULT_CHAT_ID);
-  } else {
-    console.log('Default chat not emitted (ALLOW_DEFAULT_CHAT or DEFAULT_CHAT_ID not set)');
+    date: Date.now()
   }
 
+  recentChats.set(msg.chat.id, payload)
+  io.emit('tg_message', payload)
+})
+
+io.on('connection', socket => {
+  socket.emit('chats_list', Array.from(recentChats.values()))
+  socket.emit('default_chat', DEFAULT_CHAT_ID)
+
   socket.on('send_message', async ({ chatId, text }) => {
-    const targetChatId = chatId || (ALLOW_DEFAULT_CHAT ? DEFAULT_CHAT_ID : null);
-    if (!targetChatId) {
-      socket.emit('message_sent', { ok: false, error: 'No chatId provided and DEFAULT_CHAT_ID usage is disabled on server.' });
-      return;
-    }
-
     try {
-      const res = await bot.sendMessage(Number(targetChatId), text);
-      socket.emit('message_sent', { ok: true, result: res });
-      console.log('Sent message to', targetChatId, text);
+      const result = await bot.sendMessage(chatId || DEFAULT_CHAT_ID, text)
+      socket.emit('message_sent', { ok: true, result })
     } catch (err) {
-      console.error('Failed to send message', err);
-      socket.emit('message_sent', { ok: false, error: err.toString() });
+      socket.emit('message_sent', { ok: false, error: err.message })
     }
-  });
+  })
+})
 
-  socket.on('disconnect', () => {
-    console.log('Web client disconnected', socket.id);
-  });
-});
+/* ================= START SERVER ================= */
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log('Server started on port', PORT));
+const PORT = process.env.PORT || 3000
+server.listen(PORT, () => {
+  console.log('✅ Server running on port', PORT)
+  console.log('✅ Telegram webhook:', WEBHOOK_URL)
+})
 
-// Start automatic sender (if enabled via AUTO_SEND=true)
-const { startAutoSend } = require('./lib/auto_send');
-const stopAutoSend = startAutoSend({ bot, defaultChatId: DEFAULT_CHAT_ID, allowDefaultChat: ALLOW_DEFAULT_CHAT });
-if (stopAutoSend) {
-  process.on('SIGINT', () => {
-    console.log('Stopping auto-send');
-    stopAutoSend();
-    process.exit(0);
-  });
-}
