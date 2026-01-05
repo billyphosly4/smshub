@@ -5,20 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prime Sms hub</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Optional: set server URL for deployed frontend (replace __SERVER_URL__ before deploy) -->
-    <meta name="server-url" content="__SERVER_URL__">
+    
+    <meta name="server-url" content="https://smshub-ftgg.onrender.com">
 
+    <style>
+        /* Basic Chat Styling to distinguish Users */
+        #chatBox {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            background: #f9f9f9;
+        }
+        .msg-wrapper { max-width: 80%; margin-bottom: 10px; }
+        .msg-web { align-self: flex-end; text-align: right; }
+        .msg-telegram { align-self: flex-start; text-align: left; }
+        
+        .msg {
+            padding: 8px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            word-wrap: break-word;
+        }
+        .msg-web .msg { background-color: #007bff; color: white; border-bottom-right-radius: 2px; }
+        .msg-telegram .msg { background-color: #28a745; color: white; border-bottom-left-radius: 2px; }
+        
+        .message-meta { font-size: 10px; color: #888; margin-top: 2px; }
+        .tick { margin-left: 4px; font-weight: bold; }
+        .delivered { color: #007bff; }
+    </style>
 </head>
 <body>
     <header class="header">
         <nav class="navbar">
             <div>
-                <img src="logo.png" alt="">
+                <img src="logo.png" alt="Logo">
             </div>
             <div class="button">
                 <button><a href="#">Buy Number</a></button>
             </div>
-            
         </nav>
     </header>
     
@@ -36,102 +63,67 @@
                 <img src="pic.jpg" alt="">
             </div>
         </section>
-        <section  class="white-card">
+
+        <section class="white-card">
             <div class="blog-card">
                 <h2>Over 500+ available countries & services</h2>
                 <div class="card">
                     <h3>High quality Sms verifications</h3>
-                    <p>At PrimeSmsHub, we pride ourselves on providing
-                        the highest quality Sms verifications for your 
-                        needs.We make sure to only provide non-VoIP 
-                        phone numbers in order to work with any service
-                    </p>
+                    <p>At PrimeSmsHub, we pride ourselves on providing the highest quality Sms verifications. We provide non-VoIP numbers to work with any service.</p>
                 </div>
-                <div class="card">
-                    <h3>Hassle-free Sms verifications</h3>
-                    <p>Dont feel comfortable giving out you phone Number .Protect your online identity by using our virtual phone number. </p>
                 </div>
-                <div class="card">
-                    <h3>no Price flucation</h3>
-                    <p>Our numbers start at 2 cents each and our prices never 
-                        fluctuate even during high demand.
-                    </p>
-                </div>
-                <div class="card">
-                    <h3>Efficiency</h3>
-                    <p>Dont feel comfortable giving out you phone Number .Protect your online identity by using our virtual phone number.</p>
-                </div>
-            </div>
-        </section>   
+        </section> 
+
         <section class="container">
             <div class="container-content">
-            <h2>Get started for free</h2>
-            <p>The service we offer is designed to meet your business needs.</p>
-            <div><button><a href="login.html">start for free</a></button></div>
-            <div>
-                <img src="cont.webp" alt="">
-            </div>
+                <h2>Get started for free</h2>
+                <p>The service we offer is designed to meet your business needs.</p>
+                <div><button><a href="login.html">start for free</a></button></div>
+                <div><img src="cont.webp" alt=""></div>
             </div>
         </section>
     </main>
+
     <section class="footer">
         <div class="footer-content">
-        <div> 
-            <img src="hero.png" alt="">
-        </div>
-        <p>We are trusted by over 500+ clients.join them now 
-            and grow your business
-        </p>
-        <div>
-            <h3>Quick Links</h3>
-            
+            <div><img src="hero.png" alt=""></div>
+            <p>We are trusted by over 500+ clients. Join them now and grow your business.</p>
+            <div>
+                <h3>Quick Links</h3>
                 <li><a href="login.html">Login</a></li>
                 <li><a href="signup.html">Register</a></li>
-                <li><a href="">Buy Number</a></li>
+                <li><a href="#">Buy Number</a></li>
+            </div>
+            <div>
+                <h3>Contact Us</h3>
+                <li><span>tel on +234 7048694977</span></li>
+            </div>
+            <div>
+                <h3>Social Media</h3>
+                <li><a href="#">Tiktok</a></li>
+                <li><a href="#">instagram</a></li>
+            </div>
         </div>
-        <div>
-            <h3>Contact Us</h3>
-          <li><span>tel on +234 7048694977</span></li>
-            
-        </div>
-        <div>
-            <h3>Social Media</h3>
-            
-                <li><a href="">Tiktok</a></li>
-                <li><a href="">instagram</a></li>
-                <li><a href="">Twitter</a></li>
-            
-        </div>
-        </div>
-
-
-</div>
-
     </section>
 
-    <!-- Chat widget --> 
-    <button id="openChat" title="Open chat">💬</button>
+    <button id="openChat" style="position:fixed; bottom:20px; right:20px; padding:15px; border-radius:50%; border:none; background:#007bff; color:white; cursor:pointer; font-size:20px; z-index:1000;">💬</button>
 
-    <div class="modal" id="chatModal">
-      <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <strong>Telegram Chat</strong>
-          <button id="closeChat">✖</button>
+    <div class="modal" id="chatModal" style="display:none; position:fixed; bottom:80px; right:20px; width:300px; background:white; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3); flex-direction:column; z-index:1000;">
+      <div class="modal-content" style="padding:15px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
+          <strong>Telegram Support</strong>
+          <button id="closeChat" style="border:none; background:none; cursor:pointer;">✖</button>
         </div>
-        <div id="chatBox" aria-live="polite"></div>
+        <div id="chatBox"></div>
         <div style="display:flex; gap:6px; margin-top:8px;">
-          <input id="messageInput" placeholder="Type a message" style="flex:1;" />
-          <button id="sendBtn">Send</button>
+          <input id="messageInput" placeholder="Type a message" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px;" />
+          <button id="sendBtn" style="padding:8px 15px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;">Send</button>
         </div>
-        <div id="chatStatus" style="margin-top:6px; font-size:12px; color:#666;">No chat selected</div>
-        <div style="margin-top:6px;">
-          <small>Incoming messages from Telegram appear green; web messages are blue.</small>
-        </div>
+        <div id="chatStatus" style="margin-top:6px; font-size:11px; color:#666;">Connecting...</div>
       </div>
     </div>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="script.js"></script>
 </body>
-
 </html>
