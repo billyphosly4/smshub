@@ -66,21 +66,49 @@ function appendMessage(text, cls) {
 
 let socket = null;
 
-// Connect using the Meta tag URL or current origin
 socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
 socket.on('connect', () => {
-    setChatStatus('Connected as: ' + socket.id); // This ID is what appears in your Telegram bot
-    console.log('Connected to server with ID:', socket.id);
+    setChatStatus('Connected as: ' + socket.id);
+    
+    // FETCH HISTORY: Load previous messages (including welcome) from Redis
+    fetch(`${SERVER_URL}/api/messages`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok && data.messages) {
+                chatBox.innerHTML = ''; // Clear box before loading history
+                // History comes in reverse (newest first) from LPUSH, so we reverse it back
+                data.messages.reverse().forEach(m => {
+                    const cls = m.from === 'Support' ? 'msg-telegram' : 'msg-web';
+                    appendMessage(m.text, cls);
+                });
+            }
+        }).catch(err => console.error("History error:", err));
 });
 
-// LISTEN FOR REPLIES FROM TELEGRAM
+// LISTEN FOR REPLIES & WELCOME MESSAGE
 socket.on('tg_message', (data) => {
-    appendMessage(data.text, 'msg-telegram');
+    // Only append if it's not already at the bottom (prevents duplicates with history)
+    const lastMsg = chatBox.lastElementChild ? chatBox.lastElementChild.querySelector('.msg').textContent : "";
+    if (lastMsg !== data.text) {
+        appendMessage(data.text, 'msg-telegram');
+        setChatStatus('Support replied');
+        
+        setTimeout(() => {
+            if (socket.connected) setChatStatus('Connected as: ' + socket.id);
+        }, 3000);
+    }
 });
 
+// Confirmation that message reached Telegram
 socket.on('message_sent', (payload) => {
     if (payload.ok) {
+        setChatStatus('Message delivered');
+        
+        setTimeout(() => {
+            if (socket.connected) setChatStatus('Connected as: ' + socket.id);
+        }, 3000);
+
         const ticks = document.querySelectorAll('.tick.pending');
         if (ticks.length > 0) {
             const lastTick = ticks[ticks.length - 1];
@@ -88,7 +116,7 @@ socket.on('message_sent', (payload) => {
             lastTick.textContent = ' ✓✓';
         }
     } else {
-        setChatStatus('Send failed: ' + payload.error);
+        setChatStatus('Send failed: ' + (payload.error || 'Unknown error'));
     }
 });
 
@@ -97,14 +125,12 @@ socket.on('disconnect', () => setChatStatus('Offline - Reconnecting...'));
 /* ================= SENDING LOGIC ================= */
 
 function handleSend() {
-    const text = messageInput.value.trim(); // Fixed: Defining text within the scope of the function
-
+    const text = messageInput.value.trim();
     if (!text) return;
 
-    // 1. Show the message in the web UI immediately
     appendMessage(text, 'msg-web');
+    messageInput.value = '';
 
-    // 2. Send to server via Socket.io
     if (socket && socket.connected) {
         socket.emit('send_message', { 
             text: text, 
@@ -114,12 +140,12 @@ function handleSend() {
     } else {
         setChatStatus('Not connected to server.');
     }
-
-    messageInput.value = '';
 }
 
 sendBtn.addEventListener('click', handleSend);
-
 messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleSend();
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSend();
+    }
 });
