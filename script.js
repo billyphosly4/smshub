@@ -7,8 +7,7 @@ const sendBtn = document.getElementById('sendBtn');
 const chatStatus = document.getElementById('chatStatus');
 
 const DEFAULT_CHAT_ID = 7711425125; 
-const SERVER_URL = (document.querySelector('meta[name="server-url"]') || {}).content || null;
-let currentChatId = DEFAULT_CHAT_ID;
+const SERVER_URL = (document.querySelector('meta[name="server-url"]') || {}).content || window.location.origin;
 
 /* ================= UI HELPERS ================= */
 
@@ -25,11 +24,6 @@ function closeModal() {
     setTimeout(() => { chatModal.style.display = 'none'; }, 200);
 }
 
-if (chatModal) { 
-    chatModal.classList.remove('open'); 
-    chatModal.style.display = 'none'; 
-}
-
 openChat.addEventListener('click', openModal);
 if (closeChat) closeChat.addEventListener('click', closeModal);
 
@@ -40,10 +34,7 @@ function setChatStatus(text) {
 function appendMessage(text, cls) {
     const wrapper = document.createElement('div');
     wrapper.className = cls + ' msg-wrapper';
-    wrapper.style.marginBottom = '8px';
-    wrapper.style.display = 'flex';
-    wrapper.style.flexDirection = 'column';
-
+    
     const bubble = document.createElement('div');
     bubble.className = 'msg ' + (cls === 'msg-web' ? 'msg-web' : 'msg-telegram');
     bubble.textContent = text;
@@ -75,18 +66,16 @@ function appendMessage(text, cls) {
 
 let socket = null;
 
-// Connect to the server
-const socketTarget = SERVER_URL || window.location.origin;
-socket = io(socketTarget, { transports: ['websocket', 'polling'] });
+// Connect using the Meta tag URL or current origin
+socket = io(SERVER_URL, { transports: ['websocket', 'polling'] });
 
 socket.on('connect', () => {
-    setChatStatus('Connected as: ' + socket.id); // This ID is what you see in Telegram
+    setChatStatus('Connected as: ' + socket.id); // This ID is what appears in your Telegram bot
     console.log('Connected to server with ID:', socket.id);
 });
 
 // LISTEN FOR REPLIES FROM TELEGRAM
 socket.on('tg_message', (data) => {
-    // data.text is the reply from the bot
     appendMessage(data.text, 'msg-telegram');
 });
 
@@ -107,31 +96,30 @@ socket.on('disconnect', () => setChatStatus('Offline - Reconnecting...'));
 
 /* ================= SENDING LOGIC ================= */
 
-sendBtn.addEventListener('click', () => {
-    const text = messageInput.value.trim();
+function handleSend() {
+    const text = messageInput.value.trim(); // Fixed: Defining text within the scope of the function
+
     if (!text) return;
 
     // 1. Show the message in the web UI immediately
     appendMessage(text, 'msg-web');
 
     // 2. Send to server via Socket.io
-    // The server will automatically attach your Socket ID to the notification
-    socket.emit('send_message', { 
-        text: text,
-        chatId: DEFAULT_CHAT_ID 
-    });
+    if (socket && socket.connected) {
+        socket.emit('send_message', { 
+            text: text, 
+            chatId: DEFAULT_CHAT_ID 
+        });
+        setChatStatus('Sending...');
+    } else {
+        setChatStatus('Not connected to server.');
+    }
 
     messageInput.value = '';
-    setChatStatus('Sending...');
-});
+}
+
+sendBtn.addEventListener('click', handleSend);
 
 messageInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendBtn.click();
+    if (e.key === 'Enter') handleSend();
 });
-// Inside your script.js send logic:
-const payload = { 
-  text: text, 
-  chatId: 7711425125,
-  socketId: socket.id, // THE FIX: Passing the ID to the API
-  ip: 'Optional IP'
-};
