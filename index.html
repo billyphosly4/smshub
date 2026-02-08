@@ -6,80 +6,65 @@
     <title>Prime Sms hub</title>
     <link rel="stylesheet" href="style.css">
     
-    <meta name="server-url" content="https://smshub-ftgg.onrender.com">
-
-    <style>
-        /* Basic Chat Styling to distinguish Users */
-        #chatBox {
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            background: #f9f9f9;
-        }
-        .msg-wrapper { max-width: 80%; margin-bottom: 10px; }
-        .msg-web { align-self: flex-end; text-align: right; }
-        .msg-telegram { align-self: flex-start; text-align: left; }
+        <meta name="server-url" content="https://smshub-ftgg.onrender.com">
         
-        .msg {
-            padding: 8px 12px;
-            border-radius: 15px;
-            display: inline-block;
-            word-wrap: break-word;
-        }
-        .msg-web .msg { background-color: #007bff; color: white; border-bottom-right-radius: 2px; }
-        .msg-telegram .msg { background-color: #28a745; color: white; border-bottom-left-radius: 2px; }
-        
-        .message-meta { font-size: 10px; color: #888; margin-top: 2px; }
-        .tick { margin-left: 4px; font-weight: bold; }
-        .delivered { color: #007bff; }
-    </style>
+        </style>
 </head>
 <body>
-    <header class="header">
-        <nav class="navbar">
-            <div>
-                <img src="logo.png" alt="Logo">
+        <header class="site-header header">
+            <div class="container-wide navbar">
+                <div class="brand">
+                    <img src="hero.png" alt="PrimeSmsHub">
+                    <div>
+                        <strong>PrimeSmsHub</strong>
+                        <div style="font-size:12px;color:#667781">Virtual numbers & SMS verification</div>
+                    </div>
+                </div>
+                    <div class="nav-actions">
+                                <button class="btn secondary" id="openAuthSignup" onclick="location.href='signup.html'">Sign up</button>
+                                <button class="btn primary" id="openAuthLogin" onclick="location.href='login.html'">Login / Buy</button>
+                            </div>
             </div>
-            <div class="button">
-                <button><a href="#">Buy Number</a></button>
-            </div>
-        </nav>
-    </header>
+            </header>
     
     <main>
-        <section class="hero">
-            <h1>Verify more for less with PrimeSmsHub</h1>
-            <p>Dont feel comfortable giving out you phone Number .Protect your online identity by using our virtual phone numbers</p>
-            <div class="button"> 
-                <button><a href="login.html">Buy button</a></button>
-            </div><br><br>
-            <div class="heros"> 
-                <img src="hero.png" alt="">
-            </div> 
-            <div class="pics">
-                <img src="pic.jpg" alt="">
-            </div>
-        </section>
+                <section class="hero container-wide">
+                    <div>
+                        <h1>Verify more for less with PrimeSmsHub</h1>
+                        <p>Protect your online identity by using our virtual phone numbers — reliable, affordable, and global.</p>
+                        <div class="hero-ctas">
+                            <button class="btn primary" onclick="location.href='buy-numbers.html'">Buy Number</button>
+                            <button class="btn secondary" onclick="location.href='signup.html'">Create Account</button>
+                        </div>
+
+                        <div class="cards">
+                            <div class="card"><h3>Trusted Coverage</h3><p>500+ countries and services supported.</p></div>
+                            <div class="card"><h3>Low & Stable Prices</h3><p>Transparent pricing starting at cents per request.</p></div>
+                            <div class="card"><h3>Fast Delivery</h3><p>Instant activation and delivery.</p></div>
+                            <div class="card"><h3>Secure</h3><p>Non-VoIP numbers compatible with most services.</p></div>
+                        </div>
+                    </div>
+                    <div class="hero-visual">
+                        <img src="hero.png" alt="PrimeSmsHub preview">
+                    </div>
+                </section>
 
         <section class="white-card">
             <div class="blog-card">
                 <h2>Over 500+ available countries & services</h2>
-                <div class="card">
+                <div class="cards">
                     <h3>High quality Sms verifications</h3>
                     <p>At PrimeSmsHub, we pride ourselves on providing the highest quality Sms verifications. We provide non-VoIP numbers to work with any service.</p>
                 </div>
-                  <div class="card">
+                  <div class="cards">
                <h3>Hassle-free SMS Verfiication</h3>
     <p>Don’t feel comfortable giving out your phone number? Protect your online identity by using our virtual phone numbers.</p>
         </div>
-    <div class="card">
+    <div class="cards">
     <h3>No Price Fluctuation</h3>
     <p>Our numbers start at 2 cents each, and our prices never fluctuate, even during high demand!</p>
     </div>
-    <div class="card">
+    <div class="cards">
     <h3>Efficiency</h3>
 <p>Don’t feel comfortable giving out your phone number? Protect your online identity by using our virtual phone numbers.</p>
 </div>
@@ -90,52 +75,140 @@
             <div class="container-content">
                 <h2>Get started for free</h2>
                 <p>The service we offer is designed to meet your business needs.</p>
-                <div><button><a href="login.html">start for free</a></button></div>
+                <a class="btn success" href="signup.html">Start for free</a>
                 <div><img src="cont.webp" alt=""></div>
             </div>
         </section>
     </main>
 
-    <section class="footer">
-        <div class="footer-content">
-            <div><img src="hero.png" alt=""></div>
-            <p>We are trusted by over 500+ clients. Join them now and grow your business.</p>
-            <div>
-                <h3>Quick Links</h3>
-                <li><a href="login.html">Login</a></li>
-                <li><a href="signup.html">Register</a></li>
-                <li><a href="#">Buy Number</a></li>
+        <footer class="site-footer footer">
+            <div class="footer-content">
+            <div class="footer-grid">
+                <div>
+                    <img src="hero.png" alt="PrimeSmsHub" class="logo-footer">
+                    <p class="footer-note">Trusted by 500+ clients. Secure virtual numbers worldwide.</p>
+                </div>
             </div>
-            <div>
-                <h3>Contact Us</h3>
-                <li><span>tel on +234 7048694977</span></li>
+            <div class="footer-grid footer-links-row">
+                <div>
+                    <h4>Quick Links</h4>
+                    <a href="login.html">Login</a>
+                    <a href="signup.html">Register</a>
+                    <a href="buy-numbers.html">Buy Number</a>
+                </div>
+                <div>
+                    <h4>Follow</h4>
+                    <a href="#" target="_blank">Instagram</a>
+                    <a href="#" target="_blank">TikTok</a>
+                    <a href="#" target="_blank">Telegram</a>
+                </div>
             </div>
-            <div>
-                <h3>Social Media</h3>
-                <li><a href="#">Tiktok</a></li>
-                <li><a href="#">instagram</a></li>
+            <div class="footer-grid">
+                <div>
+                    <h4>Contact</h4>
+                    <div>Phone: +234 7048694977</div>
+                    <a href="mailto:support@primesmshub.com">support@primesmshub.com</a>
+                </div>
             </div>
-        </div>
-    </section>
+            <!-- Footer-anchored chat: appears at the right inside the footer -->
+            <div class="footer-chat" aria-hidden="false">
+                <button id="openChat" aria-haspopup="dialog" aria-controls="chatPanel" aria-expanded="false" title="Open chat">💬</button>
 
-    <button id="openChat" style="position:fixed; bottom:20px; right:20px; padding:15px; border-radius:50%; border:none; background:#007bff; color:white; cursor:pointer; font-size:20px; z-index:1000;">💬</button>
+                <div id="chatPanel" class="modal" role="dialog" aria-hidden="true">
+                    <div class="modal-header">
+                        <div class="title">Telegram Support</div>
+                        <button id="closeChat" aria-label="Close chat">✖</button>
+                    </div>
+                    <div id="chatBox" class="modal-content"></div>
+                    <div class="input-row">
+                        <input id="messageInput" placeholder="Type a message" />
+                        <button id="sendBtn">Send</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </footer>
 
-    <div class="modal" id="chatModal" style="display:none; position:fixed; bottom:80px; right:20px; width:300px; background:white; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.3); flex-direction:column; z-index:1000;">
-      <div class="modal-content" style="padding:15px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
-          <strong>Telegram Support</strong>
-          <button id="closeChat" style="border:none; background:none; cursor:pointer;">✖</button>
-        </div>
-        <div id="chatBox"></div>
-        <div style="display:flex; gap:6px; margin-top:8px;">
-          <input id="messageInput" placeholder="Type a message" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px;" />
-          <button id="sendBtn" style="padding:8px 15px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer;">Send</button>
-        </div>
-        <div id="chatStatus" style="margin-top:6px; font-size:11px; color:#666;">Connecting...</div>
-      </div>
-    </div>
+        
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="script.js"></script>
+        <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+        <script src="script.js"></script>
+
+        <script>
+            // Chat panel toggle and simple UI wiring
+            (function(){
+                const openBtn = document.getElementById('openChat');
+                const panel = document.getElementById('chatPanel');
+                const closeBtn = document.getElementById('closeChat');
+                const sendBtn = document.getElementById('sendBtn');
+                const messageInput = document.getElementById('messageInput');
+                const chatBox = document.getElementById('chatBox');
+
+                function openPanel(){
+                    panel.classList.add('open');
+                    openBtn.setAttribute('aria-expanded','true');
+                    panel.setAttribute('aria-hidden','false');
+                    // focus the input for quick typing
+                    setTimeout(()=>{ messageInput.focus(); }, 120);
+                }
+                function closePanel(){
+                    panel.classList.remove('open');
+                    openBtn.setAttribute('aria-expanded','false');
+                    panel.setAttribute('aria-hidden','true');
+                    // return focus to the open button for accessibility
+                    setTimeout(()=>{ openBtn.focus(); }, 80);
+                }
+
+                openBtn.addEventListener('click', openPanel);
+                closeBtn.addEventListener('click', closePanel);
+                panel.addEventListener('click', e=>{ if(e.target===panel) closePanel(); });
+                document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePanel(); });
+
+                sendBtn.addEventListener('click', ()=>{
+                    const text = messageInput.value.trim();
+                    if(!text) return;
+                    const el = document.createElement('div');
+                    el.className='msg-wrapper msg-web';
+                    el.innerHTML = `<div class="msg">${text}</div><div class="message-meta">You</div>`;
+                    chatBox.appendChild(el);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    messageInput.value='';
+                    // TODO: integrate with Telegram socket/ backend send
+                });
+            })();
+        </script>
+        <script>
+            (function(){
+                const authModal = document.getElementById('authModal');
+                const openSignup = document.getElementById('openAuthSignup');
+                const openLogin = document.getElementById('openAuthLogin');
+                const authClose = document.getElementById('authClose');
+
+                function openModal(e){
+                    if(e) e.preventDefault();
+                    authModal.classList.add('show');
+                    authModal.setAttribute('aria-hidden','false');
+                    // trap focus
+                    const focusable = authModal.querySelectorAll('a,button');
+                    if(focusable.length) focusable[0].focus();
+                    document.addEventListener('keydown', onKey);
+                }
+
+                function closeModal(){
+                    authModal.classList.remove('show');
+                    authModal.setAttribute('aria-hidden','true');
+                    document.removeEventListener('keydown', onKey);
+                }
+
+                function onKey(e){
+                    if(e.key === 'Escape') closeModal();
+                }
+
+                if(openSignup) openSignup.addEventListener('click', openModal);
+                if(openLogin) openLogin.addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+                if(authClose) authClose.addEventListener('click', closeModal);
+                authModal.addEventListener('click', function(e){ if(e.target === authModal) closeModal(); });
+            })();
+        </script>
 </body>
 </html>

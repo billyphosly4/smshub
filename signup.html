@@ -106,9 +106,12 @@
             const user = userCredential.user;
 
             await setDoc(doc(db, "users", user.uid), {
-                name: name,
+                fullName: name,
                 email: email,
                 phone: phone,
+                country: "",
+                address: "",
+                wallet: 0,
                 createdAt: new Date()
             });
 

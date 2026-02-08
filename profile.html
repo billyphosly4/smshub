@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Profile - PrimeSmsHub</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="header">
+  <div class="menu-icon" id="menuIcon">☰</div>
+  <div class="logo"><img src="hero.png" alt="PrimeSmsHub"></div>
+  <div class="header-right">
+    <button class="wallet-btn" id="walletBtn">Wallet: $0.00</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="close-btn" id="closeBtn">✕</div>
+  <nav>
+    <ul>
+      <li><a href="dashboard.html"><span>🏠</span>Dashboard</a></li>
+      <li><a href="buy-numbers.html"><span>📱</span>Buy Numbers</a></li>
+      <li><a href="usa-numbers.html"><span>🇺🇸</span>USA Numbers</a></li>
+      <li><a href="my-orders.html"><span>📦</span>My Orders</a></li>
+      <li><a href="transactions.html"><span>💳</span>My Transactions</a></li>
+      <li><a href="profile.html"><span>👤</span>Profile</a></li>
+      <li><a href="support.html"><span>❓</span>Support</a></li>
+      <li><a href="#" id="logoutBtn"><span>🚪</span>Logout</a></li>
+    </ul>
+  </nav>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<!-- MAIN CONTENT -->
+<div class="container" id="container">
+  <div class="profile-header">
+    <h1>👤 My Profile</h1>
+    <p>Manage your account information</p>
+  </div>
+
+  <div class="grid profile-grid">
+    <!-- PROFILE FORM -->
+    <div class="card">
+      <h3>Profile Information</h3>
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" placeholder="Your full name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="your@email.com" disabled>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" placeholder="+1234567890" required>
+        </div>
+        <div class="form-group">
+          <label for="country">Country</label>
+          <select id="country" required>
+            <option value="">Select Country</option>
+            <option value="NG">🇳🇬 Nigeria</option>
+            <option value="GH">🇬🇭 Ghana</option>
+            <option value="KE">🇰🇪 Kenya</option>
+            <option value="ZA">🇿🇦 South Africa</option>
+            <option value="US">🇺🇸 United States</option>
+            <option value="UK">🇬🇧 United Kingdom</option>
+            <option value="ZM">🇿🇲 Zambia</option>
+            <option value="EG">🇪🇬 Egypt</option>
+            <option value="RW">🇷🇼 Rwanda</option>
+            <option value="TZ">🇹🇿 Tanzania</option>
+            <option value="UG">🇺🇬 Uganda</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="address">Address</label>
+          <input type="text" id="address" placeholder="Your address">
+        </div>
+        <button type="submit" class="btn" id="saveBtn">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- ACCOUNT STATS -->
+    <div class="card">
+      <h3>Account Statistics</h3>
+      <div class="stat-item">
+        <span>Total Spent</span>
+        <div id="totalSpent" style="font-size:24px;font-weight:700;color:var(--primary)">$0.00</div>
+      </div>
+      <div class="stat-item" style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+        <span>Account Created</span>
+        <div id="createdAt" style="font-size:14px;color:var(--text-secondary)">-</div>
+      </div>
+      <div class="stat-item" style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+        <span>Total Transactions</span>
+        <div id="txTotal" style="font-size:24px;font-weight:700;color:var(--primary)">0</div>
+      </div>
+      <button class="btn" style="background:#dc3545;margin-top:24px" id="deleteBtn">Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc,
+  collection, query, where, getDocs, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+/* FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyCIK3C5qAOUZUtUixX1knFRSkXAYXOCDaA",
+  authDomain: "primesmshub-c0f58.firebaseapp.com",
+  projectId: "primesmshub-c0f58"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* DOM */
+const $ = id => document.getElementById(id);
+const menuIcon=$("menuIcon"), sidebar=$("sidebar"), overlay=$("overlay"), closeBtn=$("closeBtn");
+const profileForm=$("profileForm"), saveBtn=$("saveBtn"), deleteBtn=$("deleteBtn");
+const fullNameInput=$("fullName"), emailInput=$("email"), phoneInput=$("phone");
+const countryInput=$("country"), addressInput=$("address");
+const walletBtn=$("walletBtn"), totalSpent=$("totalSpent"), createdAt=$("createdAt");
+const txTotal=$("txTotal"), logoutBtn=$("logoutBtn");
+
+/* UI - SIDEBAR TOGGLE */
+menuIcon.onclick=()=>{
+  sidebar.classList.add("open");
+  overlay.classList.add("show");
+  closeBtn.classList.add("show");
+};
+
+closeBtn.onclick=overlay.onclick=()=>{
+  sidebar.classList.remove("open");
+  overlay.classList.remove("show");
+  closeBtn.classList.remove("show");
+};
+
+sidebar.querySelectorAll("a").forEach(link=>{
+  link.onclick=()=>{
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+    closeBtn.classList.remove("show");
+  };
+});
+
+/* AUTH */
+let currentUser;
+onAuthStateChanged(auth, async user=>{
+  if(!user) return location.href="login.html";
+  currentUser=user;
+  loadUserProfile();
+});
+
+/* LOAD USER PROFILE */
+async function loadUserProfile(){
+  const ref=doc(db,"users",currentUser.uid);
+  const snap=await getDoc(ref);
+  const userData=snap.data();
+
+  fullNameInput.value=userData?.fullName||"";
+  emailInput.value=currentUser.email;
+  phoneInput.value=userData?.phone||"";
+  countryInput.value=userData?.country||"";
+  addressInput.value=userData?.address||"";
+  walletBtn.innerText=`Wallet: $${(userData?.wallet||0).toFixed(2)}`;
+
+  if(userData?.createdAt){
+    const date=new Date(userData.createdAt.toDate());
+    createdAt.innerText=date.toLocaleDateString();
+  }
+
+  // Load transaction stats
+  const q=query(collection(db,"transactions"),where("uid","==",currentUser.uid));
+  const snap_tx=await getDocs(q);
+  txTotal.innerText=snap_tx.size;
+  
+  let total=0;
+  snap_tx.forEach(doc=>{
+    total+=doc.data().amount||0;
+  });
+  totalSpent.innerText=`$${total.toFixed(2)}`;
+}
+
+/* SAVE PROFILE */
+profileForm.onsubmit=async e=>{
+  e.preventDefault();
+  saveBtn.disabled=true;
+  saveBtn.innerText="Saving...";
+
+  try{
+    const ref=doc(db,"users",currentUser.uid);
+    await updateDoc(ref,{
+      fullName:fullNameInput.value,
+      phone:phoneInput.value,
+      country:countryInput.value,
+      address:addressInput.value
+    });
+    
+    alert("✅ Profile updated successfully!");
+    loadUserProfile();
+  }catch(e){
+    alert("❌ Error updating profile: "+e.message);
+  }finally{
+    saveBtn.disabled=false;
+    saveBtn.innerText="Save Changes";
+  }
+};
+
+/* DELETE ACCOUNT */
+deleteBtn.onclick=async ()=>{
+  if(!confirm("⚠️ Are you sure you want to delete your account? This cannot be undone.")) return;
+  
+  deleteBtn.disabled=true;
+  deleteBtn.innerText="Deleting...";
+
+  try{
+    // Delete user data from Firestore
+    await deleteDoc(doc(db,"users",currentUser.uid));
+    
+    // Delete auth user
+    await deleteUser(currentUser);
+    
+    alert("Account deleted successfully");
+    location.href="index.html";
+  }catch(e){
+    alert("Error deleting account: "+e.message);
+    deleteBtn.disabled=false;
+    deleteBtn.innerText="Delete Account";
+  }
+};
+
+logoutBtn.onclick=()=>signOut(auth);
+</script>
+
+</body>
+</html>
