@@ -9,6 +9,10 @@ const axios = require('axios')
 const FIVESIM_API_KEY = process.env.FIVESIM_API_KEY || ''
 const FIVESIM_BASE_URL = 'https://5sim.net/v1'
 
+if (!FIVESIM_API_KEY) {
+  console.warn('⚠️ FIVESIM_API_KEY not set in environment')
+}
+
 const fivesimClient = axios.create({
   baseURL: FIVESIM_BASE_URL,
   headers: {

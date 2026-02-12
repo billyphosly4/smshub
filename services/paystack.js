@@ -9,6 +9,10 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || ''
 const PAYSTACK_PUBLIC_KEY = process.env.PAYSTACK_PUBLIC_KEY || ''
 const PAYSTACK_BASE_URL = 'https://api.paystack.co'
 
+if (!PAYSTACK_SECRET_KEY || !PAYSTACK_PUBLIC_KEY) {
+  console.warn('⚠️ Paystack keys not fully configured in environment')
+}
+
 const paystackClient = axios.create({
   baseURL: PAYSTACK_BASE_URL,
   headers: {

@@ -5,11 +5,22 @@ services:
     plan: free
     branch: main
     repo: https://github.com/<your-org-or-username>/smshub
-    buildCommand: "npm install --production" # optional if Render runs npm install automatically
+    buildCommand: "npm install"
     startCommand: "npm start"
     envVars:
-      - key: TELEGRAM_TOKEN
-        fromDatabase: false
-      - key: DEFAULT_CHAT_ID
-        fromDatabase: false
-    # Notes: set secrets in Render dashboard after creating service (do NOT commit tokens in repo)
+      - key: PORT
+        value: "3000"
+      - key: NODE_ENV
+        value: production
+    # IMPORTANT: Set these secrets in Render dashboard (do NOT commit tokens):
+    # - TELEGRAM_BOT_TOKEN
+    # - PAYSTACK_SECRET_KEY
+    # - PAYSTACK_PUBLIC_KEY
+    # - FIVESIM_API_KEY
+    # - FIREBASE_PROJECT_ID
+    # - FIREBASE_PRIVATE_KEY
+    # - FIREBASE_CLIENT_EMAIL
+    # - UPSTASH_REDIS_REST_URL (optional)
+    # - UPSTASH_REDIS_REST_TOKEN (optional)
+    # - DEFAULT_CHAT_ID (default: 7711425125)
+    # - SERVER_URL (your Render URL)
