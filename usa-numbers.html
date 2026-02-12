@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>USA Numbers - PrimeSmsHub</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/pages.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;color:#333}
@@ -86,10 +88,31 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;
     <p>Get premium USA phone numbers for verification</p>
   </div>
 
+  <!-- COUNTRY INFO BANNER -->
+  <div id="countryInfo"></div>
+
+  <!-- BUY NUMBER FORM -->
   <div class="card">
-    <h3>USA Number Plans</h3>
-    <p>Coming soon. Premium USA numbers with instant activation.</p>
+    <h3>🇺🇸 Buy USA Number</h3>
+    <form id="buyForm">
+      <div class="form-group">
+        <label for="service">Select Service</label>
+        <select id="service" required onchange="handleServiceChange()">
+          <option value="">-- Choose Service --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Price</label>
+        <input type="text" id="price" readonly placeholder="USA numbers: $0.49">
+      </div>
+      
+      <button type="submit" class="btn" id="buyBtn">Buy Now</button>
+    </form>
   </div>
+
+  <!-- PURCHASE SUCCESS RESULT -->
+  <div id="successResult" style="display:none;"></div>
 </div>
 
 <script type="module">
@@ -139,6 +162,9 @@ onAuthStateChanged(auth, async user=>{
 
 logoutBtn.onclick=()=>signOut(auth);
 </script>
+
+<script src="js/utils.js"></script>
+<script src="js/usa-numbers.js"></script>
 
 </body>
 </html>

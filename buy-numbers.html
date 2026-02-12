@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buy Numbers - PrimeSmsHub</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/pages.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;color:#333}
@@ -86,10 +88,35 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;
     <p>Purchase virtual phone numbers for verification services</p>
   </div>
 
+  <!-- BUY NUMBER FORM -->
   <div class="card">
-    <h3>Available Numbers</h3>
-    <p>Coming soon. Browse and purchase phone numbers from various countries.</p>
+    <h3>📱 Buy Virtual Number</h3>
+    <form id="buyForm">
+      <div class="form-group">
+        <label for="country">Select Country</label>
+        <select id="country" required onchange="handleCountryChange()">
+          <option value="">-- Choose Country --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="service">Select Service</label>
+        <select id="service" required onchange="handleServiceChange()">
+          <option value="">-- Choose Service --</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Price</label>
+        <input type="text" id="price" readonly placeholder="Select country and service">
+      </div>
+      
+      <button type="submit" class="btn" id="buyBtn">Buy Now</button>
+    </form>
   </div>
+
+  <!-- PURCHASE SUCCESS RESULT -->
+  <div id="successResult" style="display:none;"></div>
 </div>
 
 <script type="module">
@@ -139,6 +166,9 @@ onAuthStateChanged(auth, async user=>{
 
 logoutBtn.onclick=()=>signOut(auth);
 </script>
+
+<script src="js/utils.js"></script>
+<script src="js/buy-number.js"></script>
 
 </body>
 </html>
