@@ -35,10 +35,12 @@ const io = new Server(server, {
 
 // ================= CONFIGURATION ================= 
 const PORT = process.env.PORT || 3000
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const PAYSTACK_PUBLIC_KEY = process.env.PAYSTACK_PUBLIC_KEY
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY
-const DEFAULT_CHAT_ID = 7711425125 // Admin chat ID for support messages
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''
+const PAYSTACK_PUBLIC_KEY = process.env.PAYSTACK_PUBLIC_KEY || ''
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || ''
+const FIVESIM_API_KEY = process.env.FIVESIM_API_KEY || ''
+const DEFAULT_CHAT_ID = process.env.DEFAULT_CHAT_ID || 7711425125 // Admin chat ID for support messages
+const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`
 
 // Redis setup for chat history
 let redis = null
@@ -76,22 +78,30 @@ let bot = null
 let primeSMSBot = null
 
 if (TELEGRAM_BOT_TOKEN) {
-  const TelegramBot = require('node-telegram-bot-api')
-  bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false })
-  
-  // Initialize SMS hub bot
-  primeSMSBot = new PrimeSMSBot(TELEGRAM_BOT_TOKEN)
-  
-  // Webhook endpoint for Telegram
-  const botEndpoint = `/bot${TELEGRAM_BOT_TOKEN}`
-  bot.setWebHook(`${process.env.SERVER_URL || 'https://smshub-ftgg.onrender.com'}${botEndpoint}`)
-  
-  app.post(botEndpoint, (req, res) => {
-    bot.processUpdate(req.body)
-    res.sendStatus(200)
-  })
-  
-  console.log('✅ Telegram bot initialized')
+  try {
+    const TelegramBot = require('node-telegram-bot-api')
+    bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: false })
+    
+    // Initialize SMS hub bot
+    primeSMSBot = new PrimeSMSBot(TELEGRAM_BOT_TOKEN)
+    
+    // Webhook endpoint for Telegram
+    const botEndpoint = `/bot${TELEGRAM_BOT_TOKEN}`
+    if (SERVER_URL !== `http://localhost:${PORT}`) {
+      bot.setWebHook(`${SERVER_URL}${botEndpoint}`)
+    }
+    
+    app.post(botEndpoint, (req, res) => {
+      bot.processUpdate(req.body)
+      res.sendStatus(200)
+    })
+    
+    console.log('✅ Telegram bot initialized')
+  } catch (err) {
+    console.error('⚠️ Telegram bot error:', err.message)
+  }
+} else {
+  console.warn('⚠️ TELEGRAM_BOT_TOKEN not set - Telegram features disabled')
 }
 
 // ================= ACTIVE WEB SOCKETS ================= 
@@ -428,11 +438,16 @@ server.listen(PORT, () => {
 ║ Environment: ${(process.env.NODE_ENV || 'production').padEnd(25)}║
 ║ SMS Hub: ✅ Enabled                       ║
 ║ Support Chat: ✅ Enabled                  ║
-║ Telegram Bot: ${bot ? '✅ Enabled'.padEnd(26) : '❌ Disabled'.padEnd(26)}║
-║ Paystack: ${PAYSTACK_PUBLIC_KEY ? '✅ Configured'.padEnd(22) : '❌ Not configured'.padEnd(22)}║
-║ Redis: ${redis ? '✅ Connected'.padEnd(23) : '❌ Disabled'.padEnd(23)}║
+║ Telegram Bot: ${bot ? '✅ Enabled'.padEnd(26) : '⚠️  Disabled'.padEnd(26)}║
+║ Paystack: ${PAYSTACK_PUBLIC_KEY ? '✅ Configured'.padEnd(22) : '⚠️  Not configured'.padEnd(22)}║
+║ 5sim: ${FIVESIM_API_KEY ? '✅ Configured'.padEnd(23) : '⚠️  Not configured'.padEnd(23)}║
+║ Redis: ${redis ? '✅ Connected'.padEnd(23) : '⚠️  Disabled'.padEnd(23)}║
 ╚════════════════════════════════════════════╝
-  `)
+  `);
+  
+  if (!TELEGRAM_BOT_TOKEN) console.warn('⚠️  Warning: TELEGRAM_BOT_TOKEN not set');
+  if (!FIVESIM_API_KEY) console.warn('⚠️  Warning: FIVESIM_API_KEY not set');
+  console.log('✅ Server is running and ready to accept connections');
 })
 
 module.exports = { app, io, bot, primeSMSBot }
