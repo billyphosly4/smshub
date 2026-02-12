@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Transactions - PrimeSmsHub</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/pages.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;color:#333}
@@ -90,10 +92,41 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;
   </div>
 
   <div class="card">
-    <h3>📊 Recent Transactions</h3>
-    <div class="tx-list" id="txList">
-      <div style="text-align:center;padding:30px;color:#999">No transactions yet</div>
+    <h3>📊 Transaction History</h3>
+    
+    <!-- FILTER BUTTONS -->
+    <div id="filterButtons" style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" style="background:#0024ff;padding:8px 16px;font-size:13px;border-radius:20px" id="filterAll">All</button>
+      <button class="btn" style="background:#28a745;padding:8px 16px;font-size:13px;border-radius:20px" id="filterCompleted">✅ Completed</button>
+      <button class="btn" style="background:#ffc107;padding:8px 16px;font-size:13px;border-radius:20px;color:#000" id="filterPending">⏳ Pending</button>
+      <button class="btn" style="background:#dc3545;padding:8px 16px;font-size:13px;border-radius:20px" id="filterFailed">❌ Failed</button>
+      <button class="btn" style="background:#6c757d;padding:8px 16px;font-size:13px;border-radius:20px;margin-left:auto" id="exportBtn">⬇️ Export CSV</button>
     </div>
+
+    <!-- TOTAL SPENT STAT -->
+    <div id="totalSpentStat" style="background:#f0f4ff;padding:15px;border-radius:8px;margin-bottom:20px;color:#0024ff;font-weight:600">
+      Total Spent: $0.00
+    </div>
+    
+    <!-- TRANSACTIONS TABLE -->
+    <table class="transactions-table" id="transactionsTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Service</th>
+          <th>Country</th>
+          <th>Phone Number</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Order ID</th>
+        </tr>
+      </thead>
+      <tbody id="txList">
+        <tr>
+          <td colspan="7" style="text-align:center;padding:30px;color:#999">No transactions yet</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -170,6 +203,9 @@ onAuthStateChanged(auth, async user=>{
 
 logoutBtn.onclick=()=>signOut(auth);
 </script>
+
+<script src="js/utils.js"></script>
+<script src="js/transactions.js"></script>
 
 </body>
 </html>

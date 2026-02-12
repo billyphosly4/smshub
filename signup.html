@@ -15,7 +15,7 @@
             <img src="hero.png" alt="Logo">
         </div>
 
-        <h1>Welcome!</h1>
+        <h1>Welcome! 👋</h1>
         <h2>Create your account</h2>
 
         <!-- SIGNUP FORM -->
@@ -24,37 +24,39 @@
             <div class="input-area">
 
                 <div class="input-field">
-                    <label>Name</label><br><br>
+                    <label>Full Name</label>
                     <input type="text" id="name" placeholder="Your name" required>
-                </div><br>
-
-                <div class="input-field">
-                    <label>Email</label><br><br>
-                    <input type="email" id="email" placeholder="Your Email" required>
-                </div><br>
-
-                <div class="input-field">
-                    <label>Phone number</label><br><br>
-                    <input type="text" id="phone" placeholder="Your Phone number">
-                </div><br>
-
-                <div class="input-field">
-                    <label>Password</label><br><br>
-                    <input type="password" id="password" placeholder="Your Password" required>
-                </div><br>
-
-                <div class="input-field">
-                    <label>Confirm Password</label><br><br>
-                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
                 </div>
 
-            </div><br><br>
+                <div class="input-field">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Your email" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Phone Number</label>
+                    <input type="text" id="phone" placeholder="Your phone number">
+                </div>
+
+                <div class="input-field">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="At least 6 characters" required>
+                </div>
+
+                <div class="input-field">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+                </div>
+
+            </div>
 
             <div class="auth-button">
-                <button type="submit" class="btn">Register</button>
-            </div><br>
+                <button type="submit" class="btn">Register Now</button>
+            </div>
 
-            <a href="login.html">Already Registered?</a>
+            <p>Already have an account?
+                <a href="login.html">Login Here</a>
+            </p>
 
         </form>
     </div>
@@ -115,7 +117,7 @@
                 createdAt: new Date()
             });
 
-            alert("Registration successful 🎉");
+            alert("You have signed up successfully! ✅\n\nWelcome to PrimeSmsHub! Redirecting to dashboard...");
             window.location.href ="dashboard.html"; // change if needed
 
         } catch (error) {

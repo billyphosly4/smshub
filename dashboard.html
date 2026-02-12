@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PrimeSmsHub Dashboard</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/pages.css">
 </head>
 
 <body>
@@ -113,12 +114,19 @@
     </div>
   </div>
 
+  <!-- WALLET CARD -->
+  <div id="walletCard"></div>
+
+  <!-- ACTIVE NUMBERS SECTION -->
+  <div id="numbersSection" style="display:none;">
+    <h3 style="margin-bottom:20px">📱 Active Numbers</h3>
+    <div class="numbers-grid" id="numbersGrid"></div>
+  </div>
+
   <!-- TRANSACTIONS SECTION -->
-  <div class="transactions">
-    <h3>📊 Recent Transactions</h3>
-    <div class="tx-list" id="txList">
-      <div style="text-align:center;padding:30px;color:#999">No transactions yet</div>
-    </div>
+  <div id="transactionsSection" style="display:none;">
+    <h3 style="margin-bottom:20px">📊 Recent Transactions</h3>
+    <div id="transactionsContainer"></div>
   </div>
 </div>
 
@@ -325,6 +333,9 @@ async function loadTransactions(){
 
 logoutBtn.onclick=()=>signOut(auth);
 </script>
+
+<script src="js/utils.js"></script>
+<script src="js/dashboard.js"></script>
 
 </body>
 </html>
