@@ -6,7 +6,7 @@
 
 const axios = require('axios')
 
-const FIVESIM_API_KEY = '14a33d6b3ced4d2f94276607603a0086'
+const FIVESIM_API_KEY = process.env.FIVESIM_API_KEY || ''
 const FIVESIM_BASE_URL = 'https://5sim.net/v1'
 
 const fivesimClient = axios.create({
