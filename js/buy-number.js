@@ -4,7 +4,11 @@
  * Integrates with backend: POST /api/number/buy, GET /api/number/sms/:orderId
  */
 
-// BACKEND_URL is defined in utils.js - no need to redefine here
+// Ensure BACKEND_URL exists (defined in module scope in buy-numbers.html)
+if (typeof BACKEND_URL === 'undefined') {
+  window.BACKEND_URL = 'https://smshub-ftgg.onrender.com'
+  console.log('[buy-number.js] Set BACKEND_URL:', window.BACKEND_URL)
+}
 
 // Country list with pricing multipliers
 const COUNTRIES = {

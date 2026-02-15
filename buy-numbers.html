@@ -135,10 +135,11 @@ body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;
   <div id="successResult" style="display:none;"></div>
 </div>
 
-<!-- Load utils first so BACKEND_URL is available -->
-<script src="js/utils.js"></script>
-
 <script type="module">
+// Define BACKEND_URL at the top of the module
+const BACKEND_URL = 'https://smshub-ftgg.onrender.com'
+console.log('[Config] Backend URL:', BACKEND_URL)
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
@@ -186,6 +187,7 @@ onAuthStateChanged(auth, async user=>{
 logoutBtn.onclick=()=>signOut(auth);
 </script>
 
+<script src="js/utils.js"></script>
 <script src="js/buy-number.js"></script>
 
 </body>

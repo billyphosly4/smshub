@@ -3,7 +3,11 @@
  * Handles purchasing USA virtual numbers with service selection only
  */
 
-// BACKEND_URL is defined in utils.js - no need to redefine here
+// Ensure BACKEND_URL exists (defined in module scope in usa-numbers.html)
+if (typeof BACKEND_URL === 'undefined') {
+  window.BACKEND_URL = 'https://smshub-ftgg.onrender.com'
+  console.log('[usa-numbers.js] Set BACKEND_URL:', window.BACKEND_URL)
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ============================================================
