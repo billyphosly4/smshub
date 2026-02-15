@@ -18,11 +18,15 @@ class SupportChat {
 
   init() {
     // Initialize Socket.io connection
-    this.socket = io('/', { 
+    // Use BACKEND_URL if available (for production), otherwise use relative path (for localhost)
+    const socketUrl = (typeof BACKEND_URL !== 'undefined' && BACKEND_URL) ? BACKEND_URL : '/'
+    
+    this.socket = io(socketUrl, { 
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5
+      reconnectionAttempts: 5,
+      transports: ['websocket', 'polling'] // Fallback for problematic networks
     })
 
     this.socket.on('connect', () => {

@@ -21,9 +21,21 @@ const { authenticateApiKey } = require('./middleware/apikey')
 const app = express()
 const server = http.createServer(app)
 
-// Socket.io setup
+// Socket.io setup with CORS configuration
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://primesmshub.vercel.app'
+const allowedOrigins = [
+  'https://primesmshub.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5000',
+  FRONTEND_URL
+].filter(Boolean)
+
 const io = new Server(server, {
-  cors: { origin: '*' },
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST']
+  },
   pingInterval: 25000,
   pingTimeout: 60000
 })
@@ -253,9 +265,13 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ limit: '10mb', extended: true }))
 app.use(express.static(path.join(__dirname)))
 
-// CORS headers - Allow API key authentication and extensions
+// CORS headers - Allow only Vercel frontend and localhost for development
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*')
+  const origin = req.get('origin')
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin)
+    res.header('Access-Control-Allow-Credentials', 'true')
+  }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-api-key')
   if (req.method === 'OPTIONS') return res.sendStatus(200)

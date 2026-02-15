@@ -4,7 +4,17 @@
  */
 
 // ============================================================
-// API CALLER - Centralized fetch helper
+// CONFIGURATION - Set Backend URL
+// ============================================================
+// The backend URL is hardcoded to the Render deployment
+// This ensures HTTPS is used and CORS is configured correctly
+const BACKEND_URL = 'https://smshub-ftgg.onrender.com'
+
+// Debug: Log the backend URL for troubleshooting
+console.log('[Config] Backend URL:', BACKEND_URL)
+
+// ============================================================
+// API CALLER - Centralized fetch helper with enhanced error handling
 // ============================================================
 async function apiCall(endpoint, options = {}) {
   const {
@@ -26,29 +36,65 @@ async function apiCall(endpoint, options = {}) {
       config.body = JSON.stringify(body);
     }
 
-    // Determine the full URL for the API call
-    // In production, use BACKEND_URL + /api + endpoint
-    // In development (localhost), use relative path
+    // Build full URL with proper backend
     let fullUrl = endpoint;
     if (typeof BACKEND_URL !== 'undefined' && BACKEND_URL && !endpoint.startsWith('http')) {
       // Ensure endpoint starts with /api if not already
       const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
-      fullUrl = `${BACKEND_URL}${apiEndpoint}`;
+      // Remove trailing slash from BACKEND_URL if present
+      const baseUrl = BACKEND_URL.replace(/\/$/, '')
+      fullUrl = `${baseUrl}${apiEndpoint}`;
     } else if (!endpoint.startsWith('http')) {
       // Local development fallback - prepend /api if not present
       fullUrl = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
     }
 
+    console.log(`[API] ${method} ${fullUrl}`)
+
     const response = await fetch(fullUrl, config);
-    const data = await response.json();
+    
+    // Try to parse JSON response
+    let data = {};
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = { message: response.statusText };
+    }
 
     // Handle authentication errors
     if (response.status === 401) {
-      window.location.href = 'login.html';
+      console.error('[API] Unauthorized - redirecting to login')
+      if (showErrors) {
+        showError('Session expired. Please login again.');
+      }
+      setTimeout(() => {
+        window.location.href = 'login.html'
+      }, 1000)
       return null;
     }
 
-    // Handle errors
+    // Handle client errors (4xx)
+    if (response.status >= 400 && response.status < 500) {
+      const errorMsg = data.message || data.error || `Error: ${response.statusText}`;
+      console.error(`[API] Client Error (${response.status}):`, errorMsg)
+      if (showErrors) {
+        showError(errorMsg);
+      }
+      return null;
+    }
+
+    // Handle server errors (5xx)
+    if (response.status >= 500) {
+      const errorMsg = data.message || `Server Error: ${response.statusText}`;
+      console.error(`[API] Server Error (${response.status}):`, errorMsg)
+      if (showErrors) {
+        showError('Server error. Please try again later.');
+      }
+      return null;
+    }
+
+    // Handle success
     if (!response.ok) {
       if (showErrors) {
         showError(data.message || `Error: ${response.statusText}`);
@@ -59,9 +105,16 @@ async function apiCall(endpoint, options = {}) {
     return data;
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('[API] Network Error:', error);
     if (showErrors) {
-      showError('Network error. Please check your connection.');
+      // Check if it's a network error or CORS error
+      if (error.message.includes('Failed to fetch')) {
+        showError('Network error: Cannot reach the server. Check your internet connection and backend URL.');
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        showError('CORS error: Backend server may not allow requests from this origin.');
+      } else {
+        showError(`Error: ${error.message || 'Unknown error'}. Please try again.`);
+      }
     }
     return null;
   }

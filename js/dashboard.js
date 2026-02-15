@@ -3,8 +3,7 @@
  * Displays wallet balance, active numbers, and recent transactions
  */
 
-// Backend URL - set to your Render deployment URL or local dev server
-const BACKEND_URL = 'https://smshub-ftgg.onrender.com'
+// BACKEND_URL is defined in utils.js - no need to redefine here
 
 document.addEventListener('DOMContentLoaded', async () => {
   // ============================================================

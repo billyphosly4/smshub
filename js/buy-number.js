@@ -4,10 +4,7 @@
  * Integrates with backend: POST /api/number/buy, GET /api/number/sms/:orderId
  */
 
-// Backend URL - set to your Render deployment URL or local dev server
-// For production (Render): https://smshub-ftgg.onrender.com
-// For local development: http://localhost:3000
-const BACKEND_URL = 'https://smshub-ftgg.onrender.com'
+// BACKEND_URL is defined in utils.js - no need to redefine here
 
 // Country list with pricing multipliers
 const COUNTRIES = {
